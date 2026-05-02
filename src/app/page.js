@@ -15,10 +15,12 @@ export default function Home() {
   const [code, setCode] = useState("");
   const [entered, setEntered] = useState(false);
 
-  const sortItems = (items) =>
-    [...items].sort((a, b) => {
-      return Number(a.isBought) - Number(b.isBought);
-    });
+  const sortItems = (items) => {
+    const notBought = items.filter((i) => !i.isBought);
+    const bought = items.filter((i) => i.isBought);
+
+    return [...notBought, ...bought];
+  };
 
   const fetchItems = async (familyCode) => {
     if (!familyCode) return;
