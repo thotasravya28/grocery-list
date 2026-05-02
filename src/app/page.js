@@ -15,17 +15,19 @@ export default function Home() {
   const [code, setCode] = useState("");
   const [entered, setEntered] = useState(false);
 
-  // ----------------------------
-  // FETCH ITEMS
-  // ----------------------------
+  const sortItems = (items) =>
+    [...items].sort((a, b) => {
+      return Number(a.isBought) - Number(b.isBought);
+    });
+
   const fetchItems = async (familyCode) => {
     if (!familyCode) return;
 
     const res = await fetch(`/api/items?code=${familyCode}&t=${Date.now()}`);
     const data = await res.json();
 
-    setUrgentItems(data.filter((i) => i.type === "urgent"));
-    setCanWaitItems(data.filter((i) => i.type === "canWait"));
+    setUrgentItems(sortItems(data.filter((i) => i.type === "urgent")));
+    setCanWaitItems(sortItems(data.filter((i) => i.type === "canWait")));
   };
 
   useEffect(() => {
@@ -36,9 +38,6 @@ export default function Home() {
   const isEmpty =
     urgentItems.length === 0 && canWaitItems.length === 0;
 
-  // ----------------------------
-  // ADD ITEM
-  // ----------------------------
   const handleAddItem = async () => {
     if (!name.trim() || !code) return;
 
@@ -61,9 +60,6 @@ export default function Home() {
     setShowForm(false);
   };
 
-  // ----------------------------
-  // TOGGLE
-  // ----------------------------
   const toggleItem = async (item) => {
     await fetch("/api/items", {
       method: "PUT",
@@ -77,9 +73,6 @@ export default function Home() {
     fetchItems(code);
   };
 
-  // ----------------------------
-  // DELETE
-  // ----------------------------
   const deleteItem = async (id) => {
     await fetch(`/api/items?id=${id}`, {
       method: "DELETE",
@@ -88,9 +81,6 @@ export default function Home() {
     fetchItems(code);
   };
 
-  // ----------------------------
-  // SAVE EDIT
-  // ----------------------------
   const saveEdit = async () => {
     await fetch("/api/items", {
       method: "PUT",
@@ -102,9 +92,6 @@ export default function Home() {
     fetchItems(code);
   };
 
-  // ----------------------------
-  // RENDER ITEM
-  // ----------------------------
   const renderItem = (item) => (
     <div
       key={item._id}
@@ -142,14 +129,10 @@ export default function Home() {
     </div>
   );
 
-  // ----------------------------
-  // FAMILY CODE SCREEN
-  // ----------------------------
   if (!entered) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-[#f8f7f4]">
         <div className="bg-white p-6 rounded-2xl shadow-md w-80">
-
           <h2 className="text-xl font-semibold text-neutral-900 mb-4">
             Enter Family Code
           </h2>
@@ -167,18 +150,13 @@ export default function Home() {
           >
             Continue
           </button>
-
         </div>
       </main>
     );
   }
 
-  // ----------------------------
-  // MAIN UI
-  // ----------------------------
   return (
     <main className="min-h-screen bg-[#f8f7f4] px-5 py-6">
-
       <h1 className="text-2xl font-semibold mb-6 text-neutral-900">
         Shared Grocery List
       </h1>
@@ -201,7 +179,6 @@ export default function Home() {
         </>
       )}
 
-      {/* ADD BUTTON */}
       <button
         onClick={() => setShowForm(true)}
         className="fixed bottom-6 right-6 bg-black text-white w-14 h-14 rounded-full shadow-lg text-xl"
@@ -209,11 +186,9 @@ export default function Home() {
         +
       </button>
 
-      {/* ADD MODAL */}
       {showForm && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
           <div className="bg-white p-6 rounded-2xl w-80 shadow-xl">
-
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -243,16 +218,13 @@ export default function Home() {
             >
               Add
             </button>
-
           </div>
         </div>
       )}
 
-      {/* EDIT MODAL */}
       {editItem && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
           <div className="bg-white p-6 rounded-2xl w-80 shadow-xl">
-
             <input
               value={editItem.name}
               onChange={(e) =>
@@ -275,11 +247,9 @@ export default function Home() {
             >
               Save
             </button>
-
           </div>
         </div>
       )}
-
     </main>
   );
 }
