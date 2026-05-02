@@ -18,7 +18,6 @@ export default function Home() {
   const sortItems = (items) => {
     const notBought = items.filter((i) => !i.isBought);
     const bought = items.filter((i) => i.isBought);
-
     return [...notBought, ...bought];
   };
 
@@ -37,8 +36,7 @@ export default function Home() {
     fetchItems(code);
   }, [entered]);
 
-  const isEmpty =
-    urgentItems.length === 0 && canWaitItems.length === 0;
+  const isEmpty = urgentItems.length === 0 && canWaitItems.length === 0;
 
   const handleAddItem = async () => {
     if (!name.trim() || !code) return;
@@ -59,6 +57,7 @@ export default function Home() {
 
     setName("");
     setQuantity("");
+    setType("canWait");
     setShowForm(false);
   };
 
@@ -84,6 +83,8 @@ export default function Home() {
   };
 
   const saveEdit = async () => {
+    if (!editItem?.name?.trim()) return;
+
     await fetch("/api/items", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -189,8 +190,14 @@ export default function Home() {
       </button>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-2xl w-80 shadow-xl">
+        <div
+          onClick={() => setShowForm(false)}
+          className="fixed inset-0 bg-black/30 flex items-center justify-center"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white p-6 rounded-2xl w-80 shadow-xl"
+          >
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -225,23 +232,42 @@ export default function Home() {
       )}
 
       {editItem && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-2xl w-80 shadow-xl">
+        <div
+          onClick={() => setEditItem(null)}
+          className="fixed inset-0 bg-black/30 flex items-center justify-center"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white p-6 rounded-2xl w-80 shadow-xl"
+          >
             <input
               value={editItem.name}
               onChange={(e) =>
                 setEditItem({ ...editItem, name: e.target.value })
               }
+              placeholder="Item name"
               className="w-full mb-3 p-2 border rounded text-neutral-900"
             />
 
             <input
-              value={editItem.quantity}
+              value={editItem.quantity || ""}
               onChange={(e) =>
                 setEditItem({ ...editItem, quantity: e.target.value })
               }
-              className="w-full mb-4 p-2 border rounded text-neutral-900"
+              placeholder="Quantity (optional)"
+              className="w-full mb-3 p-2 border rounded text-neutral-900"
             />
+
+            <select
+              value={editItem.type}
+              onChange={(e) =>
+                setEditItem({ ...editItem, type: e.target.value })
+              }
+              className="w-full mb-4 p-2 border rounded bg-white text-neutral-900"
+            >
+              <option value="canWait">Can Wait</option>
+              <option value="urgent">Urgent</option>
+            </select>
 
             <button
               onClick={saveEdit}
